@@ -21,10 +21,20 @@ const list = [
 ];
     
 class App extends Component {
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            list, // when property name in object is same as variable name
+                  // we do not need to include both variable and state property names
+                  // "list," is the same as "list: list,"
+        };
+    }
+
     render() {	
         return (
             <div className="App">       
-                {list.map(item => // demonstrates ES6 condensed arrow function
+                {this.state.list.map(item => // demonstrates ES6 condensed arrow function
                     <div key={item.objectID}>
                         <span>
                             <a href={item.url}>{item.title}</a>
