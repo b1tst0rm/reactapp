@@ -29,6 +29,18 @@ class App extends Component {
                   // we do not need to include both variable and state property names
                   // "list," is the same as "list: list,"
         };
+
+        this.onDismiss = this.onDismiss.bind(this);
+    }
+
+    onDismiss(id) {
+        function isNotId(item) {
+            return item.objectID !== id;
+        };
+
+        const updatedList = this.state.list.filter(isNotId);
+
+        this.setState({ list: updatedList });
     }
 
     render() {	
@@ -42,6 +54,14 @@ class App extends Component {
                         <span>{item.author}</span>
                         <span>{item.num_comments}</span>
                         <span>{item.points}</span>
+                        <span>
+                            <button
+                                onClick={() => this.onDismiss(item.objectID)}
+                                type="button"
+                            >
+                                DISMISS
+                            </button>
+                        </span>
                     </div>
                 )}
             </div>
