@@ -24,7 +24,7 @@ const list = [
 // search queries
 const isSearched = searchTerm => item =>
     item.title.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
 class App extends Component {
     constructor(props) {
         super(props);
@@ -33,7 +33,7 @@ class App extends Component {
             list, // when property name in object is same as variable name
                   // we do not need to include both variable and state property names
                   // "list," is the same as "list: list,"
-            
+
             searchTerm: '', // search box should be initialized as empty
         };
 
@@ -56,17 +56,46 @@ class App extends Component {
     }
 
     render() {
-        const { searchTerm, list } = this.state; // destructuring local state object using ES6	
+        const { searchTerm, list } = this.state; // destructuring local state object using ES6
         return (
-            <div className="App">       
-                <form>
-                    <input 
-                        type="text"
-                        onChange={this.onSearchChange}
-                    />
-                </form>                
+            <div className="App">
+                <Search
+                    value={searchTerm}
+                    onChange={this.onSearchChange}
+                />
+                <Table
+                    list={list}
+                    pattern={searchTerm}
+                    onDismiss={this.onDismiss}
+                />
+            </div>
+        );
+    }
+}
 
-                {list.filter(isSearched(searchTerm)).map(item => // demonstrates ES6 condensed arrow function
+class Search extends Component {
+    render() {
+        const { value, onChange} = this.props;
+        return (
+            <form>
+                <input
+                    type="text"
+                    value={value} // make the HTML <input> a React
+                                  // controlled component
+                    onChange={onChange}
+                />
+            </form>
+        );
+    }
+}
+
+class Table extends Component {
+    render() {
+        const {list, pattern, onDismiss} = this.props;
+
+        return (
+            <div>
+                {list.filter(isSearched(pattern)).map(item => // demonstrates ES6 condensed arrow function
                     <div key={item.objectID}>
                         <span>
                             <a href={item.url}>{item.title}</a>
@@ -77,12 +106,10 @@ class App extends Component {
                         <span>
                             <button
                                 // The onDismiss method is wrapped in a "higher order function"
-                                // so that the method doesn't immediately execute when the 
+                                // so that the method doesn't immediately execute when the
                                 // browser loads the page, rather it waits for the button
                                 // to be pressed as intended
                                 onClick={() => this.onDismiss(item.objectID)}
-                                value={searchTerm} // make the HTML <input> a React
-                                                   // controlled component
                                 type="button"
                             >
                                 DISMISS
