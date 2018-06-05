@@ -28,19 +28,24 @@ input {
 }
 
 button {
-    padding: 10px;
-    border-radius: 5px;
-    border: 1px solid #dddddd;
-    background: transparent;
-    color: #808080;
+    color: black;
+    cursor: pointer;
+    background: silver;
+    border-radius: 10px;
+    padding: 5px;
 }
 
 button:hover {
-    color: red;
+    color: black;
     cursor: pointer;
-
+    background: #ffc6b5;
+    padding: 5px;
 }
 
 *:focus {
     outline: none;
+}
+
+input:focus {
+    background-color: #B5FFC6;
 }

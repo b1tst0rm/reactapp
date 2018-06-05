@@ -23,20 +23,25 @@ class App extends Component {
         this.setSearchTopStories = this.setSearchTopStories.bind(this);
         this.onDismiss = this.onDismiss.bind(this);
         this.onSearchChange = this.onSearchChange.bind(this);
+        this.onSearchSubmit = this.onSearchSubmit.bind(this);
+        this.fetchSearchTopStories = this.fetchSearchTopStories.bind(this);
     }
 
     setSearchTopStories(result) {
         this.setState({ result })
     }
 
-    componentDidMount() {
-        const { searchTerm } = this.state;
-
+    fetchSearchTopStories(searchTerm) {
         // below demonstrates ES6 string concatentation
         fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
             .then(response => response.json())
             .then(result => this.setSearchTopStories(result))
             .catch(error => error);
+    }
+
+    componentDidMount() {
+        const { searchTerm } = this.state;
+        this.fetchSearchTopStories(searchTerm);
     }
 
     onDismiss(id) {
@@ -52,44 +57,52 @@ class App extends Component {
         this.setState({ searchTerm: event.target.value });
     }
 
+    onSearchSubmit(event) {
+        const { searchTerm} = this.state;
+        this.fetchSearchTopStories(searchTerm);
+        event.preventDefault();
+    }
+
     render() {
         const { searchTerm, result } = this.state; // destructuring local state object using ES6
-
-        if (!result) { return null; }
-
         return (
             <div className="page">
                 <div className="interactions">
                     <Search
                         value={searchTerm}
                         onChange={this.onSearchChange}
+                        onSubmit={this.onSearchSubmit}
                     >
-                        Search:
+                        Search
                     </Search>
+                </div>
+                { result && // returns table only if result has value(s)
                     <Table
                         list={result.hits}
-                        pattern={searchTerm}
                         onDismiss={this.onDismiss}
                     />
-                </div>
+                }
             </div>
         );
     }
 }
 
-const Search = ({ value, onChange, children }) =>
-    <form>
-        {children} <input
+const Search = ({ value, onChange, onSubmit, children }) =>
+    <form onSubmit={onSubmit}>
+        <input
             type="text"
             value={value} // make the HTML <input> a React
                           // controlled component
             onChange={onChange}
         />
+        <button type="submit">
+            {children}
+        </button>
     </form>
 
-const Table = ({ list, pattern, onDismiss }) =>
+const Table = ({ list, onDismiss }) =>
     <div className="table">
-        {list.filter(isSearched(pattern)).map(item => // demonstrates ES6 condensed arrow function
+        {list.map(item => // demonstrates ES6 condensed arrow function
             <div key={item.objectID} className="table-row">
                 <span style={{ width : '40%'}}>
                     <a href={item.url}>{item.title}</a>
@@ -102,7 +115,7 @@ const Table = ({ list, pattern, onDismiss }) =>
                         onClick={() => onDismiss(item.objectID)}
                         className="button-inline"
                     >
-                        DISMISS
+                        Delete
                     </Button>
                 </span>
             </div>
