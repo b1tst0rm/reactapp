@@ -75,66 +75,43 @@ class App extends Component {
     }
 }
 
-class Search extends Component {
-    render() {
-        const { value, onChange, children } = this.props;
-        return (
-            <form>
-                {children} <input
-                    type="text"
-                    value={value} // make the HTML <input> a React
-                                  // controlled component
-                    onChange={onChange}
-                />
-            </form>
-        );
-    }
-}
+const Search = ({ value, onChange, children }) =>
+    <form>
+        {children} <input
+            type="text"
+            value={value} // make the HTML <input> a React
+                          // controlled component
+            onChange={onChange}
+        />
+    </form>
 
-class Table extends Component {
-    render() {
-        const {list, pattern, onDismiss} = this.props;
-
-        return (
-            <div>
-                {list.filter(isSearched(pattern)).map(item => // demonstrates ES6 condensed arrow function
-                    <div key={item.objectID}>
-                        <span>
-                            <a href={item.url}>{item.title}</a>
-                        </span>
-                        <span>{item.author}</span>
-                        <span>{item.num_comments}</span>
-                        <span>{item.points}</span>
-                        <span>
-                            <Button onClick={() => this.onDismiss(item.objectID)}>
-                                DISMISS
-                            </Button>
-                        </span>
-                    </div>
-                )}
+const Table = ({ list, pattern, onDismiss }) =>
+    <div>
+        {list.filter(isSearched(pattern)).map(item => // demonstrates ES6 condensed arrow function
+            <div key={item.objectID}>
+                <span>
+                    <a href={item.url}>{item.title}</a>
+                </span>
+                <span>{item.author}</span>
+                <span>{item.num_comments}</span>
+                <span>{item.points}</span>
+                <span>
+                    <Button onClick={() => this.onDismiss(item.objectID)}>
+                        DISMISS
+                    </Button>
+                </span>
             </div>
-        );
-    }
-}
+        )}
+    </div>
 
-class Button extends Component {
-    render() {
-        const {
-            onClick,
-            className = '', // default value assigned when destructuring
-            children,
-        } = this.props;
+const Button = ({ onClick, className, children }) =>
+    <button
+        onClick={onClick}
+        className={className}
+        type="button"
+    >
+        {children}
+    </button>
 
-        return (
-            <button
-                onClick={onClick}
-                className={className}
-                type="button"
-            >
-                {children}
-            </button>
-        );
-    }
-}
 
 export default App;
