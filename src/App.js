@@ -1,24 +1,10 @@
 import React, { Component } from 'react';
 import './App.css';
 
-const list = [
-    {
-        title: 'React',
-        url: 'https://facebook.github.io/react/',
-        author: 'Jordan Walke',
-        num_comments: 3,
-        points: 4,
-        objectID: 0,
-    },
-    {
-        title: 'Redux',
-        url: 'https://github.com/reactjs/redux/',
-        author: 'Dan Abramov, Andrew Clark',
-        num_comments: 2,
-        points: 5,
-        objectID: 1,
-    },
-];
+const DEFAULT_QUERY = 'redux';
+const PATH_BASE = 'https://hn.algolia.com/api/v1';
+const PATH_SEARCH = '/search';
+const PARAM_SEARCH = 'query=';
 
 // a higher-order function defined outside of the App component to filter from
 // search queries
@@ -30,25 +16,36 @@ class App extends Component {
         super(props);
 
         this.state = {
-            list, // when property name in object is same as variable name
-                  // we do not need to include both variable and state property names
-                  // "list," is the same as "list: list,"
-
-            searchTerm: '', // search box should be initialized as empty
+            result: null,
+            searchTerm: DEFAULT_QUERY,
         };
 
+        this.setSearchTopStories = this.setSearchTopStories.bind(this);
         this.onDismiss = this.onDismiss.bind(this);
         this.onSearchChange = this.onSearchChange.bind(this);
     }
 
+    setSearchTopStories(result) {
+        this.setState({ result })
+    }
+
+    componentDidMount() {
+        const { searchTerm } = this.state;
+
+        // below demonstrates ES6 string concatentation
+        fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}`)
+            .then(response => response.json())
+            .then(result => this.setSearchTopStories(result))
+            .catch(error => error);
+    }
+
     onDismiss(id) {
-        function isNotId(item) {
-            return item.objectID !== id;
-        };
+        const isNotId = item => item.objectID !== id;
+        const updatedHits = this.state.result.hits.filter(isNotId);
 
-        const updatedList = this.state.list.filter(isNotId);
-
-        this.setState({ list: updatedList });
+        this.setState({
+            result: { ...this.state.result, hits: updatedHits }
+        });
     }
 
     onSearchChange(event) {
@@ -56,7 +53,10 @@ class App extends Component {
     }
 
     render() {
-        const { searchTerm, list } = this.state; // destructuring local state object using ES6
+        const { searchTerm, result } = this.state; // destructuring local state object using ES6
+
+        if (!result) { return null; }
+
         return (
             <div className="page">
                 <div className="interactions">
@@ -67,7 +67,7 @@ class App extends Component {
                         Search:
                     </Search>
                     <Table
-                        list={list}
+                        list={result.hits}
                         pattern={searchTerm}
                         onDismiss={this.onDismiss}
                     />
