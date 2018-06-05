@@ -62,7 +62,9 @@ class App extends Component {
                 <Search
                     value={searchTerm}
                     onChange={this.onSearchChange}
-                />
+                >
+                    Search:
+                </Search>
                 <Table
                     list={list}
                     pattern={searchTerm}
@@ -75,10 +77,10 @@ class App extends Component {
 
 class Search extends Component {
     render() {
-        const { value, onChange} = this.props;
+        const { value, onChange, children } = this.props;
         return (
             <form>
-                <input
+                {children} <input
                     type="text"
                     value={value} // make the HTML <input> a React
                                   // controlled component
@@ -104,20 +106,33 @@ class Table extends Component {
                         <span>{item.num_comments}</span>
                         <span>{item.points}</span>
                         <span>
-                            <button
-                                // The onDismiss method is wrapped in a "higher order function"
-                                // so that the method doesn't immediately execute when the
-                                // browser loads the page, rather it waits for the button
-                                // to be pressed as intended
-                                onClick={() => this.onDismiss(item.objectID)}
-                                type="button"
-                            >
+                            <Button onClick={() => this.onDismiss(item.objectID)}>
                                 DISMISS
-                            </button>
+                            </Button>
                         </span>
                     </div>
                 )}
             </div>
+        );
+    }
+}
+
+class Button extends Component {
+    render() {
+        const {
+            onClick,
+            className = '', // default value assigned when destructuring
+            children,
+        } = this.props;
+
+        return (
+            <button
+                onClick={onClick}
+                className={className}
+                type="button"
+            >
+                {children}
+            </button>
         );
     }
 }
