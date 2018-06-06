@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import axios from 'axios'; // axios: browser replacement for
                            // async requests to remote APIs.
+import PropTypes from 'prop-types';
+
 import './App.css';
 
 const DEFAULT_QUERY = 'redux';
-const DEFAULT_HPP = '100'; // HPP = Hits Per Page, or how many resultss are returned
+const DEFAULT_HPP = '2'; // HPP = Hits Per Page, or how many resultss are returned
                            // per API request.
 
 const PATH_BASE = 'https://hn.algolia.com/api/v1';
@@ -12,6 +14,9 @@ const PATH_SEARCH = '/search';
 const PARAM_SEARCH = 'query=';
 const PARAM_PAGE = 'page=';
 const PARAM_HPP = 'hitsPerPage=';
+
+const Loading = () =>
+    <div>Loading...</div>
 
 class App extends Component {
     _isMounted = false;
@@ -24,6 +29,7 @@ class App extends Component {
             searchKey: '',
             searchTerm: DEFAULT_QUERY,
             error: null,
+            isLoading: false,
         };
 
         this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
@@ -57,11 +63,13 @@ class App extends Component {
             results: {
                 ...results,
                 [searchKey]: { hits: updatedHits, page }
-            }
+            },
+            isLoading: false
         });
     }
 
     fetchSearchTopStories(searchTerm, page = 0) {
+        this.setState({ isLoading: true });
         // below demonstrates ES6 string concatentation
         axios(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}\
             &${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
@@ -117,7 +125,8 @@ class App extends Component {
             searchTerm,
             results,
             searchKey,
-            error
+            error,
+            isLoading
         } = this.state;
 
         const page = (
@@ -153,10 +162,13 @@ class App extends Component {
                             onDismiss={this.onDismiss}
                         />
                         <div className="interactions">
-                            <Button onClick={() => this.fetchSearchTopStories(searchKey,
-                              page + 1 )}>
-                                More
-                            </Button>
+                            { isLoading
+                                ? <Loading />
+                                : <Button onClick={() => this.fetchSearchTopStories(searchKey,
+                                  page + 1 )}>
+                                    More
+                                </Button>
+                            }
                         </div>
                     </div>
                 }
@@ -165,18 +177,37 @@ class App extends Component {
     }
 }
 
-const Search = ({ value, onChange, onSubmit, children }) =>
-    <form onSubmit={onSubmit}>
-        <input
-            type="text"
-            value={value} // make the HTML <input> a React
-                          // controlled component
-            onChange={onChange}
-        />
-        <button type="submit">
-            {children}
-        </button>
-    </form>
+class Search extends Component {
+    componentDidMount() {
+        if(this.input) {
+            this.input.focus();
+        }
+    }
+
+    render() {
+        const {
+            value,
+            onChange,
+            onSubmit,
+            children
+        } = this.props;
+
+        return (
+            <form onSubmit={onSubmit}>
+                <input
+                    type="text"
+                    value={value} // make the HTML <input> a React
+                                  // controlled component
+                    onChange={onChange}
+                    ref={(node) => { this.input = node; }}
+                />
+                <button type="submit">
+                    {children}
+                </button>
+            </form>
+        );
+    }
+}
 
 const Table = ({ list, onDismiss }) =>
     <div className="table">
@@ -200,6 +231,19 @@ const Table = ({ list, onDismiss }) =>
         )}
     </div>
 
+Table.propTypes = {
+    list: PropTypes.arrayOf(
+        PropTypes.shape({
+            objectID: PropTypes.string.isRequired,
+            author: PropTypes.string,
+            url: PropTypes.string,
+            num_comments: PropTypes.number,
+            points: PropTypes.number,
+        })
+    ).isRequired,
+    onDismiss: PropTypes.func.isRequired,
+};
+
 const Button = ({ onClick, className, children }) =>
     <button
         onClick={onClick}
@@ -209,5 +253,21 @@ const Button = ({ onClick, className, children }) =>
         {children}
     </button>
 
+Button.propTypes = {
+    onClick: PropTypes.func.isRequired,
+    className: PropTypes.string,
+    children: PropTypes.node.isRequired,
+};
+
+Button.defaultProps = {
+    className: '',
+};
 
 export default App;
+
+// Exporting components for unit testing with Jest
+export {
+    Button,
+    Search,
+    Table,
+}
