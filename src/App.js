@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 import './App.css';
 
 const DEFAULT_QUERY = 'redux';
-const DEFAULT_HPP = '2'; // HPP = Hits Per Page, or how many resultss are returned
+const DEFAULT_HPP = '10'; // HPP = Hits Per Page, or how many resultss are returned
                            // per API request.
 
 const PATH_BASE = 'https://hn.algolia.com/api/v1';
@@ -14,9 +14,6 @@ const PATH_SEARCH = '/search';
 const PARAM_SEARCH = 'query=';
 const PARAM_PAGE = 'page=';
 const PARAM_HPP = 'hitsPerPage=';
-
-const Loading = () =>
-    <div>Loading...</div>
 
 class App extends Component {
     _isMounted = false;
@@ -162,13 +159,11 @@ class App extends Component {
                             onDismiss={this.onDismiss}
                         />
                         <div className="interactions">
-                            { isLoading
-                                ? <Loading />
-                                : <Button onClick={() => this.fetchSearchTopStories(searchKey,
-                                  page + 1 )}>
-                                    More
-                                </Button>
-                            }
+                            <ButtonWithLoading
+                                isLoading={isLoading}
+                                onClick={() => this.fetchSearchTopStories(searchKey, page + 1 )}>
+                                More
+                            </ButtonWithLoading>
                         </div>
                     </div>
                 }
@@ -262,6 +257,20 @@ Button.propTypes = {
 Button.defaultProps = {
     className: '',
 };
+
+const Loading = () =>
+    <div>Loading...</div>
+
+// Below is an example of a Higher-Order Component, or HOC.
+// A HOC accepts input (usually a component) and outputs a component.
+// The ({ isLoading, ...rest }) clause sends all props EXCEPT for isLoading
+// as the input component does NOT care about this value. We only use isLoading
+// for the conditional statement (? :).
+const withLoading = (Component) => ({ isLoading, ...rest }) => isLoading
+    ? <Loading />
+    : <Component { ...rest } />
+
+const ButtonWithLoading = withLoading(Button);
 
 export default App;
 
